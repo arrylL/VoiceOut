@@ -25,9 +25,24 @@ if ($data) {
     $stmt->bind_param("ssssss", $name, $student_id, $department, $password_hash, $secret_question, $secret_answer_hash);
 
     if ($stmt->execute()) {
-        echo json_encode(["status" => "success", "message" => "Account created!"]);
+        // Log the new user in immediately — set the PHP session
+        session_start();
+        $_SESSION['user_id'] = $conn->insert_id;
+        $_SESSION['role']    = 'student';
+
+        echo json_encode([
+            "status" => "success",
+            "message" => "Account created!",
+            "user" => [
+                "id"          => $conn->insert_id,
+                "student_id"  => $student_id,
+                "name"        => $name,
+                "department"  => $department,
+                "role"        => 'student'
+            ]
+        ]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Error: " . $stmt->error]);
+        echo json_encode(["status" => "error", "message" => "Database Error: " . $stmt->error]);
     }
     $stmt->close();
 } else {

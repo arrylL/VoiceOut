@@ -101,15 +101,17 @@ $('#login').onsubmit = async (e) => {
     const result = await res.json();
 
     if (result.status === 'success') {
-      state.user = {
-        db_id: result.user.id,
-        id: result.user.student_id,
-        name: result.user.name,
-        dept: result.user.department,
-        role: result.user.role
-      };
-      enter();
-    } else {
+        state.users.push(u);
+        state.user = {
+          db_id: result.user.id,
+          id: result.user.student_id,
+          name: result.user.name,
+          dept: result.user.department,
+          role: result.user.role
+        };
+        enter();
+        toast('Account created. Welcome to VoiceOut!');
+      } else {
       $('#l-err').textContent = result.message;
     }
   } catch (err) {
@@ -311,32 +313,32 @@ function drawerRenderRoot() {
 
   const adminItems = `
     <li><button data-open="admin-account">
-      <span class="icon">👤</span>
+      <span class="icon"><i class="ic ic-user"></i></span>
       <span class="label">Admin account<small>Username and role</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="password">
-      <span class="icon">🔒</span>
+      <span class="icon"><i class="ic ic-lock"></i></span>
       <span class="label">Password &amp; security<small>Change your password</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="appearance">
-      <span class="icon">🎨</span>
+      <span class="icon"><i class="ic ic-palette"></i></span>
       <span class="label">Appearance<small>Theme preference</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="about">
-      <span class="icon">ℹ️</span>
+      <span class="icon"><i class="ic ic-info"></i></span>
       <span class="label">About VoiceOut<small>Who we are</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="help">
-      <span class="icon">💬</span>
+      <span class="icon"><i class="ic ic-chat"></i></span>
       <span class="label">Help &amp; support<small>Contact &amp; FAQ</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="logout" class="danger">
-      <span class="icon">⎋</span>
+      <span class="icon"><i class="ic ic-logout"></i></span>
       <span class="label">Log out<small>End your session</small></span>
       <span class="chev">›</span>
     </button></li>
@@ -344,27 +346,27 @@ function drawerRenderRoot() {
 
   const studentItems = `
     <li><button data-open="account">
-      <span class="icon">👤</span>
+      <span class="icon"><i class="ic ic-user"></i></span>
       <span class="label">Account details<small>Name, student ID, department</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="password">
-      <span class="icon">🔒</span>
+      <span class="icon"><i class="ic ic-lock"></i></span>
       <span class="label">Password &amp; security<small>Change your password</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="about">
-      <span class="icon">ℹ️</span>
+      <span class="icon"><i class="ic ic-info"></i></span>
       <span class="label">About VoiceOut<small>Who we are</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="help">
-      <span class="icon">💬</span>
+      <span class="icon"><i class="ic ic-chat"></i></span>
       <span class="label">Help &amp; support<small>Contact &amp; FAQ</small></span>
       <span class="chev">›</span>
     </button></li>
     <li><button data-open="logout" class="danger">
-      <span class="icon">⎋</span>
+      <span class="icon"><i class="ic ic-logout"></i></span>
       <span class="label">Log out<small>End your session</small></span>
       <span class="chev">›</span>
     </button></li>
@@ -526,7 +528,7 @@ function drawerAbout() {
       <p>Every concern you submit is logged, routed to the right office, and given a status: <strong>Pending</strong> → <strong>In review</strong> → <strong>Resolved</strong>. You'll see admin remarks on the concern once it's resolved.</p>
       <h3 style="margin-top:1.2rem">About SLSU Lucena</h3>
       <p>Southern Luzon State University – Lucena Campus is one of the university's satellite campuses serving students in Quezon Province. VoiceOut is built to support the campus's commitment to responsive, student-centered administration.</p>
-      <p class="meta" style="margin-top:1.2rem">Version 1.0.0 · Built with ❤️ for SLSU students</p>
+      <p class="meta" style="margin-top:1.2rem">Version 1.0.0 · Built with 💚 for SLSU students</p>
     </div>
   `;
   drawerShell('About VoiceOut', body, { back: true });
@@ -912,7 +914,7 @@ function admRender() {
       </nav>
       <div class="top-actions">
         <button class="btn ghost corner-settings" id="admin-open-settings" aria-label="Settings">
-          <span aria-hidden="true">⚙</span> <span class="corner-label">Settings</span>
+          <span aria-hidden="true"><i class="ic ic-gear"></i></span> <span class="corner-label">Settings</span>
         </button>
       </div>
     </header>
