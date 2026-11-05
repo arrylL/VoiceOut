@@ -602,7 +602,8 @@ function drawerLogout() {
 
 const views = {
   home(el) {
-    el.innerHTML = `<section class="hero">
+    el.innerHTML = `<div class="home-bg">
+      <section class="hero">
         <h1>Your concern deserves an answer.</h1>
         <p>
           VoiceOut is a central place for students to raise concerns about academics, facilities,
@@ -619,7 +620,8 @@ const views = {
       <footer class="school">
         <strong>School details</strong><br />[Southern Luzon State University Lucena Campus] · [Brgy. Ibabang Dupay, Lucena City] · [+639123456789] ·
         [slsulucena@gmail.com] · Office hours: Mon–Fri, 8:00 AM–5:00 PM
-      </footer>`;
+      </footer>
+    </div>`;
     $('#cta').onclick = () => go('complain');
   },
 

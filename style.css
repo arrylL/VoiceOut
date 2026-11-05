@@ -1828,7 +1828,91 @@ dialog::backdrop {
   }
 }
 
-/* 15. Icons (replace emoji; colour follows the text colour) ------------- */
+/* 15. Student Home background (reuses the login campus photo) ------------ */
+.home-bg {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 80px);
+  margin: -2rem -4rem -4rem;
+  padding: 2rem 4rem 4rem;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+  overflow: hidden;
+}
+
+/* Campus photo (same as login) */
+.home-bg::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  z-index: -2;
+  background: var(--campus-photo) center / cover no-repeat;
+  animation: bgDrift 38s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Green tint overlay (same as login) */
+.home-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 600px at 15% 20%, rgba(34, 160, 91, 0.28), transparent 60%),
+    linear-gradient(160deg, rgba(6, 36, 20, 0.78), rgba(8, 40, 22, 0.58));
+}
+
+/* Make text readable over the photo */
+.home-bg .hero h1 {
+  -webkit-text-fill-color: #fff;
+  background: none;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+}
+
+.home-bg .hero p {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+
+.home-bg .steps div {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.home-bg .steps strong {
+  color: #fff;
+}
+
+.home-bg footer.school {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+.home-bg footer.school strong {
+  color: #fff;
+}
+
+@media (min-width: 761px) and (max-width: 1024px) {
+  .home-bg {
+    margin: -2rem -2rem -4rem;
+    padding: 2rem 2rem 4rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-bg {
+    margin: -1.2rem -1.1rem -3rem;
+    padding: 1.2rem 1.1rem 3rem;
+  }
+}
+
+/* 16. Icons (replace emoji; colour follows the text colour) ------------- */
 .ic {
   display: inline-block;
   flex: none;
