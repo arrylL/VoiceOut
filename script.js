@@ -101,17 +101,15 @@ $('#login').onsubmit = async (e) => {
     const result = await res.json();
 
     if (result.status === 'success') {
-        state.users.push(u);
-        state.user = {
-          db_id: result.user.id,
-          id: result.user.student_id,
-          name: result.user.name,
-          dept: result.user.department,
-          role: result.user.role
-        };
-        enter();
-        toast('Account created. Welcome to VoiceOut!');
-      } else {
+      state.user = {
+        db_id: result.user.id,
+        id: result.user.student_id,
+        name: result.user.name,
+        dept: result.user.department,
+        role: result.user.role
+      };
+      enter();
+    } else {
       $('#l-err').textContent = result.message;
     }
   } catch (err) {
