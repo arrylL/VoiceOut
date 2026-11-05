@@ -22,6 +22,7 @@ while ($row = $result->fetch_assoc()) {
     $row['d']    = date('M d, Y g:i A', strtotime($row['created_at']));
     $row['read'] = (bool)$row['is_read'];
     $rows[] = $row;
+    $row['concern_id'] = $row['concern_id'] ?? null;
 }
 
 echo json_encode($rows);

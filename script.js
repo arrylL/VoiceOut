@@ -17,6 +17,7 @@ const norm = (s) =>
     .trim();
 
 const KEY = 'vo_db_v1';
+const ADMIN_LAST_SEEN_KEY = 'vo_admin_last_seen_concerns';
 
 function load() {
   try {
@@ -24,6 +25,20 @@ function load() {
   } catch (e) {
     return null;
   }
+}
+
+function adminLastSeenConcerns() {
+  try {
+    return parseInt(localStorage.getItem(ADMIN_LAST_SEEN_KEY) || '0', 10);
+  } catch (e) {
+    return 0;
+  }
+}
+
+function setAdminLastSeenConcerns(ts) {
+  try {
+    localStorage.setItem(ADMIN_LAST_SEEN_KEY, String(ts));
+  } catch (e) {}
 }
 
 const d0 = load() || {};
@@ -45,8 +60,7 @@ function save() {
   } catch (e) {}
 }
 
-const mine = () => state.concerns.filter((c) => c.uid === state.user.id),
-  myN = () => state.notifs.filter((n) => n.uid === state.user.id);
+const myN = () => state.notifs.filter((n) => n.uid === state.user.id);
 
 function toast(m) {
   const t = $('#toast');
@@ -69,6 +83,23 @@ function confirmBox({ title, body, yes, no, danger }, cb) {
   };
   $('#d-no').onclick = () => d.close();
   d.showModal();
+}
+
+function updateAdminConcernsDot() {
+  const dot = $('#admin-concerns-dot');
+  if (!dot) return;
+
+  const lastSeen = adminLastSeenConcerns();
+  const newCount = (state.concerns || []).filter((c) => {
+    const ts =
+      typeof c.createdAt === 'number'
+        ? c.createdAt
+        : new Date(c.created_at || c.createdAt || 0).getTime();
+    return ts > lastSeen;
+  }).length;
+
+  dot.classList.toggle('hidden', newCount === 0);
+  dot.title = newCount > 0 ? `${newCount} new concern${newCount === 1 ? '' : 's'}` : '';
 }
 
 /* AUTH */
@@ -96,7 +127,7 @@ $('#login').onsubmit = async (e) => {
     const res = await fetch('login_process.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ student_id: id, password: pw })
+      body: JSON.stringify({ student_id: id, password: pw }),
     });
     const result = await res.json();
 
@@ -106,7 +137,7 @@ $('#login').onsubmit = async (e) => {
         id: result.user.student_id,
         name: result.user.name,
         dept: result.user.department,
-        role: result.user.role
+        role: result.user.role,
       };
       enter();
     } else {
@@ -153,15 +184,21 @@ $('#signup').onsubmit = async (e) => {
         department: u.dept,
         password: u.pw,
         secret_question: u.sq,
-        secret_answer: u.sa
-      })
+        secret_answer: u.sa,
+      }),
     });
 
     const result = await response.json();
 
     if (result.status === 'success') {
+      state.user = {
+        db_id: result.user?.id || null,
+        id: u.id,
+        name: u.name,
+        dept: u.dept,
+        role: result.user?.role || 'student',
+      };
       state.users.push(u);
-      state.user = u;
       enter();
       toast('Account created. Welcome to VoiceOut!');
     } else {
@@ -233,7 +270,6 @@ function go(v) {
   window.scrollTo(0, 0);
 }
 
-/* --- BADGE (fetches unread count from database) --- */
 async function badge() {
   if (!state.user) {
     $('#badge').classList.add('hidden');
@@ -251,7 +287,7 @@ async function badge() {
   }
 }
 
-/* --- SETTINGS DRAWER -------------------------------------------------- */
+/* SETTINGS DRAWER */
 function openSettingsDrawer() {
   const drawer = $('#settings-drawer');
   const overlay = $('#settings-overlay');
@@ -288,9 +324,11 @@ function drawerShell(title, bodyHTML, { back = false } = {}) {
   const drawer = $('#settings-drawer');
   drawer.innerHTML = `
     <div class="drawer-head">
-      ${back
-        ? `<button class="drawer-back" id="drawer-back" aria-label="Back">←</button>`
-        : `<span style="width:40px"></span>`}
+      ${
+        back
+          ? `<button class="drawer-back" id="drawer-back" aria-label="Back">←</button>`
+          : `<span style="width:40px"></span>`
+      }
       <h2>${esc(title)}</h2>
       <button class="drawer-close" id="drawer-close" aria-label="Close">×</button>
     </div>
@@ -306,8 +344,9 @@ function drawerRenderRoot() {
   const userLabel = isAdmin
     ? adminUser || 'Administrator'
     : state.user?.name || 'Signed in';
-  const userSub = isAdmin ? 'Administrator' : (state.user?.id || '');
-  const initial = (isAdmin ? (adminUser || 'A') : (state.user?.name || '?')).trim().charAt(0).toUpperCase() || '?';
+  const userSub = isAdmin ? 'Administrator' : state.user?.id || '';
+  const initial =
+    (isAdmin ? adminUser || 'A' : state.user?.name || '?').trim().charAt(0).toUpperCase() || '?';
 
   const adminItems = `
     <li><button data-open="admin-account">
@@ -392,13 +431,13 @@ function drawerRenderRoot() {
 }
 
 function drawerRenderSection(key) {
-  if (key === 'account')       return drawerAccount();
+  if (key === 'account') return drawerAccount();
   if (key === 'admin-account') return drawerAdminAccount();
-  if (key === 'password')      return drawerPassword();
-  if (key === 'appearance')    return drawerAppearance();
-  if (key === 'about')         return drawerAbout();
-  if (key === 'help')          return drawerHelp();
-  if (key === 'logout')        return drawerLogout();
+  if (key === 'password') return drawerPassword();
+  if (key === 'appearance') return drawerAppearance();
+  if (key === 'about') return drawerAbout();
+  if (key === 'help') return drawerHelp();
+  if (key === 'logout') return drawerLogout();
 }
 
 function drawerAccount() {
@@ -583,9 +622,7 @@ function drawerLogout() {
         yes: 'Log out',
         no: 'Stay',
       },
-      () => {
-        logout();
-      }
+      () => logout()
     );
     return;
   }
@@ -618,8 +655,7 @@ const views = {
         <div><strong>Get a reply</strong>Read the admin's remarks once it's resolved.</div>
       </div>
       <footer class="school">
-        <strong>School details</strong><br />[Southern Luzon State University Lucena Campus] · [Brgy. Ibabang Dupay, Lucena City] · [+639123456789] ·
-        [slsulucena@gmail.com] · Office hours: Mon–Fri, 8:00 AM–5:00 PM
+        <strong>School details</strong><br />Southern Luzon State University · Lucena Campus · Brgy. Ibabang Dupay, Lucena City · Office hours: Mon–Fri, 8:00 AM–5:00 PM
       </footer>
     </div>`;
     $('#cta').onclick = () => go('complain');
@@ -791,24 +827,68 @@ const views = {
         }
         el.innerHTML =
           `<h2>Notifications</h2>
-           <p class="meta">${rows.length} notification${rows.length === 1 ? '' : 's'}</p>
+           <p class="meta">${rows.length} notification${rows.length === 1 ? '' : 's'} · Tap a notification to open its concern.</p>
            <div class="card" style="margin-top:1rem;padding:0">` +
-          (rows.length
-            ? rows
-                .map(
-                  (n) => `<div class="note ${n.read ? '' : 'new'}">
-                    <span class="pill ${n.t === 'Resolved' ? 'Resolved' : 'In-review'}">${n.t}</span>
-                    <div>
-                      <strong>${esc(n.m)}</strong>
-                      ${n.remark ? `<div class="meta">Admin remarks: ${esc(n.remark)}</div>` : ''}
-                      <div class="meta">${n.d}</div>
-                    </div>
-                  </div>`
-                )
+            (rows.length
+              ? rows
+                  .map((n) => {
+                    const isResolved = n.t === 'Resolved';
+                    const statusClass = isResolved ? 'resolved-status' : 'review-status';
+                    const statusTitle = isResolved ? 'Resolved' : 'In review';
+                    const statusIcon = isResolved
+                      ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`
+                      : `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
+
+                    return `<div class="note click ${n.read ? '' : 'new'}" data-notif-concern="${n.concern_id || ''}" tabindex="0" role="button">
+                      <span class="notif-status-icon ${statusClass}">${statusIcon}</span>
+                        <div class="notif-body">
+                        <div class="notif-title">${esc(statusTitle)}</div>
+                        <div class="notif-message">${esc(n.m)}</div>
+                        ${n.remark ? `<div class="notif-remark"><strong>Admin remarks</strong>${esc(n.remark)}</div>` : ''}
+                        <div class="notif-time">${esc(n.d)}</div>
+                      </div>
+                    </div>`;
+                  })
                 .join('')
-            : `<div class="empty">Nothing yet. You'll be notified when an admin reviews or resolves your concern.</div>`) +
+              : `<div class="empty">Nothing yet. You'll be notified when an admin reviews or resolves your concern.</div>`) +
           `</div>`;
+
         badge();
+
+        // Make notifications clickable → open the concern dialog
+        el.querySelectorAll('[data-notif-concern]').forEach((card) => {
+          const concernId = card.dataset.notifConcern;
+          if (!concernId) return;
+
+          const handleOpen = async () => {
+            let concern = state.concerns.find((c) => String(c.id) === String(concernId));
+            if (!concern) {
+              try {
+                const res = await fetch('get_concerns.php');
+                const rows2 = await res.json();
+                if (Array.isArray(rows2)) {
+                  state.concerns = rows2;
+                  concern = state.concerns.find((c) => String(c.id) === String(concernId));
+                }
+              } catch (err) {
+                console.error('Could not load concern:', err);
+              }
+            }
+            if (!concern) {
+              toast('This concern is no longer available.');
+              return;
+            }
+            openC(concernId);
+          };
+
+          card.onclick = handleOpen;
+          card.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleOpen();
+            }
+          };
+        });
       })
       .catch((err) => {
         console.error('Notifications fetch failed:', err);
@@ -910,7 +990,10 @@ function admRender() {
       </span>
       <nav aria-label="Admin">
         <button data-t="an">Analytics</button>
-        <button data-t="con">Concerns</button>
+        <button data-t="con" id="admin-concerns-btn">
+          Concerns
+          <span class="nav-dot hidden" id="admin-concerns-dot"></span>
+        </button>
       </nav>
       <div class="top-actions">
         <button class="btn ghost corner-settings" id="admin-open-settings" aria-label="Settings">
@@ -975,12 +1058,16 @@ function admRender() {
     (b) =>
       (b.onclick = () => {
         tab = b.dataset.t;
+        if (tab === 'con') {
+          setAdminLastSeenConcerns(Date.now());
+          const dot = $('#admin-concerns-dot');
+          if (dot) dot.classList.add('hidden');
+        }
         admTab();
       })
   );
   $('#t-an').onclick = async (e) => {
     if (e.target.closest('[data-calopen]')) {
-      // Re-fetch concerns so the calendar reflects any new status changes
       try {
         const res = await fetch('admin_get_concerns.php');
         const rows = await res.json();
@@ -1055,6 +1142,12 @@ function admList() {
       }
       state.concerns = rows;
 
+      if (tab === 'con') {
+        setAdminLastSeenConcerns(Date.now());
+        const dot = $('#admin-concerns-dot');
+        if (dot) dot.classList.add('hidden');
+      }
+
       const C = rows,
         cnt = (s) => C.filter((c) => c.status === s).length,
         rank = { 'Critical priority': 0, Moderate: 1, Low: 2 };
@@ -1106,6 +1199,7 @@ function admList() {
         : `<div class="card empty">${C.length ? 'No concerns match these filters.' : 'No concerns submitted yet.'}</div>`;
 
       admAnalytics();
+      updateAdminConcernsDot();
     })
     .catch((err) => {
       console.error(err);
@@ -1156,18 +1250,17 @@ function calHtml() {
         <span class="pill ${c.status}">${c.status === 'In-review' ? 'In review' : c.status}</span>
       </header>
       <p class="meta">
-        ${new Date(t).toLocaleTimeString('en-PH', { timeStyle: 'short' })} · ${esc(c.concern_type)} ·
+        ${new Date(t).toLocaleTimeString('en-PH', { timeStyle: 'short', timeZone: 'Asia/Manila' })} · ${esc(c.concern_type)} ·
         ${esc(c.level)} · From ${esc(c.by)}
       </p>
     </article>`;
   let panel =
     '<p class="meta" style="margin-top:1rem">Select a date to see everything submitted or resolved that day.</p>';
-    if (calSel) {
+  if (calSel) {
     const [yy, mm, dd] = calSel.split('-').map(Number),
       rawA = by[calSel] || [],
       b = rs[calSel] || [];
 
-    // Remove concerns from the "Submitted" list if they were resolved on this same day
     const resolvedIds = new Set(b.map((c) => String(c.id)));
     const a = rawA.filter((c) => !(c.status === 'Resolved' && resolvedIds.has(String(c.id))));
 
@@ -1256,11 +1349,16 @@ function lineChart() {
     );
 
   const submitted = cnt((c) => c.createdAt);
-  const resolved  = cnt((c) => c.resolvedAt);
+  const resolved = cnt((c) => c.resolvedAt);
 
   const buildChart = (title, data, color) => {
     const mx = Math.max(1, ...data);
-    const W = 320, H = 150, L = 26, B = 22, T = 10, R = 8;
+    const W = 320,
+      H = 150,
+      L = 26,
+      B = 22,
+      T = 10,
+      R = 8;
     const X = (i) => L + (i * (W - L - R)) / (N - 1),
       Y = (v) => T + (H - T - B) * (1 - v / mx),
       pts = (a) => a.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
@@ -1494,9 +1592,7 @@ function dataBytes(u) {
 function openC(id) {
   const c = state.concerns.find((x) => x.id == id);
   if (!c) return;
-  const f = c.file && typeof c.file === 'object' ? c.file : null,
-    d = $('#cdlg'),
-    img = f && (f.type || '').startsWith('image/');
+  const d = $('#cdlg');
   d.innerHTML = `<header style="display:flex;justify-content:space-between;gap:1rem;align-items:start">
       <h3 style="min-width:0">${esc(c.title)}</h3>
       <span class="pill ${c.status}">${c.status === 'In-review' ? 'In review' : c.status}</span>

@@ -1966,3 +1966,99 @@ dialog::backdrop {
 .ic-heart {
   --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z'/%3E%3C/svg%3E");
 }
+
+nav button .nav-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  background: var(--bad);
+  border-radius: 50%;
+  vertical-align: middle;
+  box-shadow: 0 0 0 2px var(--surface);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+/* Notification status icons */
+.notif-status-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.notif-status-icon.pending-status {
+  background: color-mix(in srgb, var(--muted) 14%, var(--surface));
+  color: var(--muted);
+}
+
+.notif-status-icon.review-status {
+  background: var(--pill-review-bg);
+  color: var(--pill-review-ink);
+}
+
+.notif-status-icon.resolved-status {
+  background: var(--pill-ok-bg);
+  color: var(--pill-ok-ink);
+}
+
+.notif-status-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Notification layout */
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notif-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.notif-message {
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.notif-remark {
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--soft);
+  border-left: 3px solid var(--brand);
+  border-radius: 4px 8px 8px 4px;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.notif-remark strong {
+  color: var(--brand);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.notif-time {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}

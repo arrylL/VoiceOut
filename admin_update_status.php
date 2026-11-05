@@ -43,8 +43,8 @@ if ($concern && in_array($status, ['In-review', 'Resolved'])) {
         ? "Your concern \"{$concern['title']}\" has been resolved."
         : "Your concern \"{$concern['title']}\" is now under review.";
 
-    $ins = $conn->prepare("INSERT INTO notifications (user_id, type, message, remark) VALUES (?, ?, ?, ?)");
-    $ins->bind_param("isss", $concern['user_id'], $msgType, $msg, $remark);
+    $ins = $conn->prepare("INSERT INTO notifications (user_id, type, message, remark, concern_id) VALUES (?, ?, ?, ?, ?)");
+    $ins->bind_param("isssi", $concern['user_id'], $msgType, $msg, $remark, $id);
     $ins->execute();
     $ins->close();
 }
