@@ -725,12 +725,21 @@ const views = {
         <button class="btn big" id="cta">Complain Here</button>
       </section>
       <div class="steps">
-        <div><strong>Send it</strong>Describe the concern, set its urgency, attach proof.</div>
-        <div><strong>Track it</strong>See if it's Pending, In review, or Resolved.</div>
-        <div><strong>Get a reply</strong>Read the admin's remarks once it's resolved.</div>
+        <div data-go="complain" role="button" tabindex="0"><strong>Send it</strong>Describe the concern, set its urgency, attach proof.</div>
+        <div data-go="status" role="button" tabindex="0"><strong>Track it</strong>See if it's Pending, In review, or Resolved.</div>
+        <div data-go="notifs" role="button" tabindex="0"><strong>Get a reply</strong>Read the admin's remarks once it's resolved.</div>
       </div>
     </div>`;
     $('#cta').onclick = () => go('complain');
+    el.querySelectorAll('.steps [data-go]').forEach((card) => {
+      card.onclick = () => go(card.dataset.go);
+      card.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          go(card.dataset.go);
+        }
+      };
+    });
   },
 
   complain(el) {

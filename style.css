@@ -2196,3 +2196,12 @@ nav button .nav-dot {
 .card > .empty {
   border: 0;
 }
+
+/* Clickable step cards on the student home */
+.steps div[data-go] {
+  cursor: pointer;
+}
+
+.steps div[data-go]:active {
+  transform: translateY(-1px);
+}
