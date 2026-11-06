@@ -207,14 +207,16 @@ textarea {
 .btn.big {
   padding: 1.05rem 2rem;
   font-size: 1.15rem;
-  background: linear-gradient(135deg, #ffc533, var(--accent));
-  color: #1d2a12;
+  background: var(--brand);
+  color: var(--brand-ink);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(255, 180, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 
 .btn.big:hover {
-  box-shadow: 0 12px 32px rgba(255, 180, 0, 0.5);
+  filter: brightness(1.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 
 .btn.danger {
@@ -2061,4 +2063,136 @@ nav button .nav-dot {
   margin-top: 0.35rem;
   color: var(--muted);
   font-size: 0.8rem;
+}
+/* 17. Password field: eye toggle, strength rules, match message ---------- */
+.pw-wrap {
+  position: relative;
+}
+
+.pw-wrap input {
+  padding-right: 3.2rem !important;
+}
+
+.pw-eye {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.pw-eye:hover {
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.pw-eye svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:is(#auth, #admin) .authbox .card .pw-eye {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+:is(#auth, #admin) .authbox .card .pw-eye:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pw-rules {
+  --pw-ok: var(--ok);
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.pw-rules li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+.pw-rules li::before {
+  content: '○';
+  flex: none;
+  width: 1rem;
+  text-align: center;
+}
+
+.pw-rules li.ok {
+  color: var(--pw-ok);
+  font-weight: 600;
+}
+
+.pw-rules li.ok::before {
+  content: '✓';
+}
+
+:is(#auth, #admin) .authbox .card .pw-rules {
+  --pw-ok: #8ff0bb;
+}
+
+:is(#auth, #admin) .authbox .card .pw-rules li {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+:is(#auth, #admin) .authbox .card .pw-rules li.ok {
+  color: var(--pw-ok);
+}
+
+.pw-match {
+  min-height: 1.2rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pw-match.ok {
+  color: var(--ok);
+}
+
+.pw-match.bad {
+  color: var(--bad);
+}
+
+:is(#auth, #admin) .authbox .card .pw-match.ok {
+  color: #8ff0bb;
+}
+
+:is(#auth, #admin) .authbox .card .pw-match.bad {
+  color: #ffb0b0;
+}
+
+@media (max-width: 420px) {
+  .pw-rules {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Empty state inside a card (Notifications): no second dashed border */
+.card > .empty {
+  border: 0;
 }

@@ -84,6 +84,16 @@ require 'db_connect.php';
             </div>
             <label for="s-pw">Password</label>
             <input type="password" id="s-pw" autocomplete="new-password" />
+            <ul class="pw-rules" id="pw-rules" aria-live="polite">
+              <li data-rule="len">At least 8 characters</li>
+              <li data-rule="upper">One uppercase letter (A–Z)</li>
+              <li data-rule="lower">One lowercase letter (a–z)</li>
+              <li data-rule="num">One number (0–9)</li>
+              <li data-rule="sym">One special character (!@#$%…)</li>
+            </ul>
+            <label for="s-pw2">Confirm password</label>
+            <input type="password" id="s-pw2" autocomplete="new-password" />
+            <p class="pw-match" id="pw-match" aria-live="polite"></p>
             <label for="s-sq">Secret question</label>
             <select id="s-sq"></select>
             <label for="s-sa">Your answer</label>

@@ -102,6 +102,78 @@ function updateAdminConcernsDot() {
   dot.title = newCount > 0 ? `${newCount} new concern${newCount === 1 ? '' : 's'}` : '';
 }
 
+/* PASSWORD HELPERS: eye toggle + strength rules */
+const EYE_ON =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF =
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+
+function addEye(input) {
+  if (input.dataset.eye) return;
+  input.dataset.eye = '1';
+  const wrap = document.createElement('div');
+  wrap.className = 'pw-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'pw-eye';
+  btn.setAttribute('aria-label', 'Show password');
+  btn.setAttribute('aria-pressed', 'false');
+  btn.innerHTML = EYE_ON;
+  btn.onclick = () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.innerHTML = show ? EYE_OFF : EYE_ON;
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+  };
+  wrap.appendChild(btn);
+}
+
+function enhancePasswords(root = document) {
+  root.querySelectorAll('input[type="password"]').forEach(addEye);
+}
+
+enhancePasswords();
+// Also covers password fields created later (settings drawer, forgot-password dialog, admin login)
+new MutationObserver(() => enhancePasswords()).observe(document.body, {
+  childList: true,
+  subtree: true,
+});
+
+const PW_RULES = {
+  len: (p) => p.length >= 8,
+  upper: (p) => /[A-Z]/.test(p),
+  lower: (p) => /[a-z]/.test(p),
+  num: (p) => /[0-9]/.test(p),
+  sym: (p) => /[^A-Za-z0-9\s]/.test(p),
+};
+
+const pwStrong = (p) => Object.values(PW_RULES).every((f) => f(p));
+
+function updatePwUI() {
+  const p = $('#s-pw').value;
+  const p2 = $('#s-pw2').value;
+  document.querySelectorAll('#pw-rules li').forEach((li) => {
+    li.classList.toggle('ok', PW_RULES[li.dataset.rule](p));
+  });
+  const m = $('#pw-match');
+  if (!p2) {
+    m.textContent = '';
+    m.className = 'pw-match';
+  } else if (p === p2) {
+    m.textContent = 'Passwords match.';
+    m.className = 'pw-match ok';
+  } else {
+    m.textContent = 'Passwords do not match.';
+    m.className = 'pw-match bad';
+  }
+}
+
+$('#s-pw').oninput = updatePwUI;
+$('#s-pw2').oninput = updatePwUI;
+
 /* AUTH */
 function authTab(login) {
   $('#login').classList.toggle('hidden', !login);
@@ -161,12 +233,15 @@ $('#signup').onsubmit = async (e) => {
     sq: $('#s-sq').value,
     sa: norm($('#s-sa').value),
   };
+  const pw2 = $('#s-pw2').value;
 
   const need = !u.dept.includes('Teacher') || u.prog;
   let m = '';
-  if (!u.name || !u.id || !u.dept || !u.pw) m = 'Fill in all fields.';
+  if (!u.name || !u.id || !u.dept || !u.pw || !pw2) m = 'Fill in all fields.';
   else if (!need) m = 'Choose your program.';
-  else if (u.pw.length < 6) m = 'Password must be at least 6 characters.';
+  else if (!pwStrong(u.pw))
+    m = 'Password is too weak. Meet all the requirements listed below the password field.';
+  else if (u.pw !== pw2) m = 'The passwords do not match.';
   else if (u.sa.length < 2) m = 'Answer your secret question.';
 
   $('#s-err').textContent = m;
@@ -654,9 +729,6 @@ const views = {
         <div><strong>Track it</strong>See if it's Pending, In review, or Resolved.</div>
         <div><strong>Get a reply</strong>Read the admin's remarks once it's resolved.</div>
       </div>
-      <footer class="school">
-        <strong>School details</strong><br />Southern Luzon State University · Lucena Campus · Brgy. Ibabang Dupay, Lucena City · Office hours: Mon–Fri, 8:00 AM–5:00 PM
-      </footer>
     </div>`;
     $('#cta').onclick = () => go('complain');
   },
