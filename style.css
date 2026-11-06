@@ -963,9 +963,9 @@ main {
   width: 34px;
   height: 34px;
   margin-bottom: 0.8rem;
-  background: linear-gradient(135deg, var(--accent), #ffd45c);
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
   border-radius: 10px;
-  color: #1d2a12;
+  color: var(--brand-ink);
   font: 800 1rem 'Bricolage Grotesque', sans-serif;
 }
 
